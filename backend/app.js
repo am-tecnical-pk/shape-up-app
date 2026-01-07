@@ -5,7 +5,7 @@ dotenv.config();
 import cookieParser from "cookie-parser";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import connectDB from "./config/db.js";
-import cors from "cors"; // Imported here
+import cors from "cors"; 
 
 const port = process.env.PORT || 9000;
 
@@ -23,11 +23,12 @@ connectDB();
 
 const app = express();
 
-// ✅ FIX 1: USE CORS MIDDLEWARE
-// We allow localhost (for testing) and we will allow your Vercel Frontend later.
-// When you deploy your frontend, come back and replace "https://YOUR-FRONTEND.vercel.app" with your actual URL.
+// ✅ UPDATED CORS CONFIGURATION
 app.use(cors({
-    origin: ["http://localhost:3000", "https://shape-up-frontend.vercel.app"], 
+    origin: [
+        "http://localhost:3000",                  // For local development
+        "https://shape-up-app-gray.vercel.app"    // 👈 Your actual Vercel Frontend
+    ], 
     credentials: true
 }));
 
@@ -46,11 +47,10 @@ app.use("/api/reminders", reminderRoutes);
 app.use("/api/ai", aiRoutes); 
 app.use("/api/support", emailRoutes);
 
-// ✅ FIX 2: REMOVE STATIC FILE SERVING
-// Vercel hosting separates Frontend and Backend. The Backend does not serve the HTML.
+// Root Route
 app.get("/", (req, res) => res.send("API is running..."));
 
-// Error Middleware (ALWAYS KEEP THESE AT THE BOTTOM)
+// Error Middleware
 app.use(notFound);
 app.use(errorHandler);
 
