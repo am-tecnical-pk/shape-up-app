@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;700&display=swap');
+
+:root {
+  --primary-color: #0d6efd;
+  --bg-light: #FFFAFB;
+  --text-light: #212529;
+  
+  --bg-dark: #121212;
+  --card-dark: #1e1e1e;
+  --input-dark: #2d2d2d;
+  --text-dark: #e0e0e0;
+  --border-dark: #444;
+}
+
+/* --- Global Reset --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* =========================================
+   🌙 DARK MODE SUPER FIXES
+   ========================================= */
+
+body.dark-mode {
+  background-color: var(--bg-dark) !important;
+  color: var(--text-dark) !important;
+}
+
+/* 1. Force Dark Background on ALL Components */
+.dark-mode .card,
+.dark-mode .modal-content,
+.dark-mode .list-group-item,
+.dark-mode .dropdown-menu, /* Fixes the dropdown menu background */
+.dark-mode .exercise-card,
+.dark-mode .bodyPart-card,
+.dark-mode .bg-light,
+.dark-mode .bg-white {
+  background-color: var(--card-dark) !important;
+  color: #fff !important;
+  border: 1px solid var(--border-dark) !important;
+}
+
+/* 2. Fix Dropdown Items in Dark Mode */
+.dark-mode .dropdown-item {
+  color: var(--text-dark);
+}
+.dark-mode .dropdown-item:hover,
+.dark-mode .dropdown-item:focus {
+  background-color: #333;
+  color: #fff;
+}
+
+/* 3. Inputs, Selects, Textareas */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea,
+.dark-mode .form-control,
+.dark-mode .form-select {
+  background-color: var(--input-dark) !important;
+  border: 1px solid var(--border-dark) !important;
+  color: #fff !important;
+}
+
+.dark-mode ::placeholder {
+  color: #bbb !important;
+}
+
+/* 4. Navbar */
+.dark-mode .navbar {
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid var(--border-dark);
+}
+.dark-mode .navbar-brand, 
+.dark-mode .nav-link {
+  color: #e0e0e0 !important;
+}
+.dark-mode .nav-link.active {
+  color: var(--primary-color) !important;
+}
+
+/* 5. Tables */
+.dark-mode .table {
+  color: #e0e0e0 !important;
+  border-color: var(--border-dark);
+}
+.dark-mode .table thead th {
+  background-color: #252525 !important;
+  color: #fff !important;
+  border-bottom: 2px solid var(--border-dark);
+}
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #e0e0e0 !important;
+}
+
+/* 6. Text Visibility Fixes */
+.dark-mode .text-muted {
+  color: #aaa !important;
+}
+.dark-mode .text-dark {
+  color: #fff !important;
+}
+.dark-mode h1, .dark-mode h2, .dark-mode h3, 
+.dark-mode h4, .dark-mode h5, .dark-mode h6 {
+  color: #fff !important;
+}
+.dark-mode .btn-close {
+  filter: invert(1);
+}
+
+/* =========================================
+   🌙 FOOTER & CHATBOT DARK MODE FIXES
+   ========================================= */
+
+/* --- Footer Fix --- */
+body.dark-mode footer,
+body.dark-mode .footer {
+    background-color: var(--card-dark) !important;
+    color: var(--text-dark) !important;
+    border-top: 1px solid var(--border-dark) !important;
+}
+
+body.dark-mode footer a {
+    color: var(--primary-color) !important;
+}
+
+body.dark-mode footer a:hover {
+    color: #fff !important;
+}
+
+/* --- Chatbot Fix --- */
+/* Outer Container */
+body.dark-mode .chatbot-container, 
+body.dark-mode .chat-window,
+body.dark-mode .card.h-100 { /* Target the card wrapper specifically if needed */
+    background-color: var(--card-dark) !important;
+    border: 1px solid var(--border-dark) !important;
+    color: #fff !important;
+}
+
+/* Header */
+body.dark-mode .chat-header,
+body.dark-mode .card-header {
+    background-color: #0b5ed7 !important; 
+    color: white !important;
+    border-bottom: 1px solid var(--border-dark);
+}
+
+/* Chat Body / Messages Area */
+body.dark-mode .chat-body,
+body.dark-mode .messages-container,
+body.dark-mode .card-body {
+    background-color: var(--bg-dark) !important;
+}
+
+/* Bot Message Bubble */
+body.dark-mode .message.bot,
+body.dark-mode .bot-message {
+    background-color: #333 !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #444;
+}
+
+/* User Message Bubble */
+body.dark-mode .message.user,
+body.dark-mode .user-message {
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+/* Input Area / Footer */
+body.dark-mode .chat-footer,
+body.dark-mode .input-area,
+body.dark-mode .card-footer {
+    background-color: var(--card-dark) !important;
+    border-top: 1px solid var(--border-dark) !important;
+}
+
+/* =========================================
+   📱 RESPONSIVENESS UTILITIES
+   ========================================= */
+
+@media (max-width: 768px) {
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .col-md-5, .col-md-7, .col-lg-5, .col-lg-7 {
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 20px;
+  }
+}
+
+/* --- Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* --- Card Hover Effects --- */
+.exercise-card-hover {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.exercise-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* --- Dashboard Specifics --- */
+.dashboard-container {
+  max-width: 1400px;
+}
