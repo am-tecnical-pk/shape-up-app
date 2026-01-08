@@ -6,28 +6,36 @@ const chatWithAI = asyncHandler(async (req, res) => {
   const API_KEY = process.env.GEMINI_API_KEY;
 
   if (!API_KEY) {
-      return res.status(500).json({ reply: "❌ Error: GEMINI_API_KEY is missing in .env" });
+      console.error("❌ CRITICAL ERROR: GEMINI_API_KEY is missing in Vercel Environment Variables.");
+      return res.status(500).json({ reply: "System Error: API Key is missing." });
   }
 
   const name = userData?.name || "Athlete";
-  const systemInstruction = `Role: Fitness Trainer. User: ${name}. Keep it short. Question: "${message}"`;
+  // Create a context-aware prompt
+  const fullPrompt = `
+    Role: Fitness Trainer. 
+    User Name: ${name}. 
+    User Question: "${message}". 
+    Keep the answer short, motivating, and helpful.
+  `;
 
   try {
     const genAI = new GoogleGenerativeAI(API_KEY);
-    
-    // Using the stable free model
+
+    // ✅ FIX: Using "gemini-1.5-flash" 
+    // This model is currently the most reliable Free Tier model on Vercel.
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const result = await model.generateContent(systemInstruction);
+    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     res.json({ reply: response.text() });
 
   } catch (error) {
-    console.error("❌ Google AI Error:", error);
-    
-    // 👇 THIS WILL SHOW THE REAL ERROR ON YOUR SCREEN
+    // This log will appear in your Vercel Function Logs
+    console.error("❌ VERCEL AI ERROR:", error);
+
     res.status(500).json({ 
-        reply: `⚠️ DEBUG ERROR: ${error.message}` 
+        reply: "My brain is buffering 🧠. (Server Error: Check Vercel Logs)" 
     });
   }
 });
