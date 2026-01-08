@@ -3,47 +3,50 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const chatWithAI = asyncHandler(async (req, res) => {
   const { message, userData } = req.body;
-  
   const API_KEY = process.env.GEMINI_API_KEY;
 
-  // 1. Check if Key exists and looks valid
-  if (!API_KEY) {
-      return res.status(500).json({ reply: "❌ CRITICAL: GEMINI_API_KEY is missing from Vercel." });
-  }
-  if (!API_KEY.startsWith("AIza")) {
-      return res.status(500).json({ reply: `❌ CRITICAL: Invalid Key format. It starts with '${API_KEY.substring(0,3)}...', but should start with 'AIza'. Check for spaces!` });
-  }
+  if (!API_KEY) return res.status(500).json({ reply: "❌ Key missing." });
 
+  // 1. Setup Context
   const name = userData?.name || "Athlete";
-  const fullPrompt = `Trainer for ${name}. Question: "${message}". Keep it short.`;
-
-  const genAI = new GoogleGenerativeAI(API_KEY);
+  const fullPrompt = `Role: Fitness Trainer. User: ${name}. Question: "${message}". Keep it short.`;
 
   try {
-    // 2. Try the Newest Model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    // Try the standard model first
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     return res.json({ reply: response.text() });
 
-  } catch (error1) {
-    console.error("Attempt 1 Failed:", error1.message);
+  } catch (error) {
+    console.error("❌ Generation Failed. Fetching available models...");
 
     try {
-        // 3. Try the Older Stable Model
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-        const result = await fallbackModel.generateContent(fullPrompt);
-        const response = await result.response;
-        return res.json({ reply: "✅ (Backup Model): " + response.text() });
+        // 🚨 AUTO-DEBUGGER: Ask Google what models ARE available for this key
+        const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
+        const listData = await listResponse.json();
 
-    } catch (error2) {
-        console.error("Attempt 2 Failed:", error2.message);
-        
-        // 4. RETURN BOTH ERRORS TO THE CHAT
-        // Paste this output back to me!
-        return res.status(500).json({ 
-            reply: `🚫 ALL FAILED. \n\nErr1: ${error1.message} \n\nErr2: ${error2.message}` 
-        });
+        if (listData.models) {
+            // Filter for models that support "generateContent"
+            const validModels = listData.models
+                .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+                .map(m => m.name.replace("models/", "")) // Clean up names
+                .join(", ");
+
+            // 👇 RETURN THE LIST TO YOUR CHAT WINDOW
+            return res.status(500).json({ 
+                reply: `⚠️ YOUR KEY HAS ACCESS TO THESE MODELS ONLY:\n\n${validModels}\n\n(Tell me one of these names!)` 
+            });
+        } else {
+            return res.status(500).json({ 
+                reply: `❌ NO MODELS FOUND. Error: ${JSON.stringify(listData)}` 
+            });
+        }
+
+    } catch (fetchError) {
+        return res.status(500).json({ reply: `❌ CRITICAL FAILURE: ${fetchError.message}` });
     }
   }
 });
