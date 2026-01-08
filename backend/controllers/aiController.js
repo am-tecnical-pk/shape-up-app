@@ -6,34 +6,28 @@ const chatWithAI = asyncHandler(async (req, res) => {
   
   const API_KEY = process.env.GEMINI_API_KEY;
 
-  console.log("🔹 AI Request Received. Key exists?", !!API_KEY); 
+  // Debug: Log if key is missing (First 4 chars only for safety)
+  console.log("🔹 AI Request. Key starts with:", API_KEY ? API_KEY.substring(0, 4) : "MISSING");
 
   if (!API_KEY) {
-      console.error("❌ ERROR: Vercel does not have the GEMINI_API_KEY set.");
-      return res.status(500).json({ reply: "System Error: API Key missing." });
+      return res.status(500).json({ reply: "❌ Configuration Error: Vercel missing GEMINI_API_KEY." });
   }
 
-  // User Context Setup
   const name = userData?.name || "Athlete";
-  const goal = userData?.goal || "General Fitness"; 
-  const weight = userData?.weight ? `${userData.weight}kg` : "unknown";
-
   const fullPrompt = `
-    ROLE: You are "Shape Up AI", a fitness trainer.
-    USER: ${name}, Goal: ${goal}, Weight: ${weight}.
-    RULES: Keep answers short (max 3 sentences). Be motivating!
-    QUESTION: "${message}"
+    ROLE: Personal Trainer. User: ${name}.
+    Question: "${message}"
+    Keep it short.
   `;
 
   try {
-    // Initialize Google AI
     const genAI = new GoogleGenerativeAI(API_KEY);
 
-    // ✅ FIX: Use "gemini-1.5-flash-001" or "gemini-pro" which are more stable
-    // "gemini-1.5-flash" sometimes errors out on specific API versions.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+    // ✅ TRYING THE MOST STANDARD MODEL ID FIRST
+    // "gemini-1.5-flash" is the current standard. 
+    // If this fails, the error message below will tell us why.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // Generate Response
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
@@ -41,24 +35,13 @@ const chatWithAI = asyncHandler(async (req, res) => {
     res.json({ reply: text });
 
   } catch (error) {
-    console.error("❌ AI Error:", error);
+    console.error("❌ Google AI Error:", error);
     
-    // Fallback: If Flash fails, try the older robust model "gemini-pro" automatically
-    try {
-        if (error.message.includes("not found") || error.message.includes("404")) {
-            console.log("⚠️ Retrying with gemini-pro...");
-            const genAI = new GoogleGenerativeAI(API_KEY);
-            const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-            const result = await fallbackModel.generateContent(fullPrompt);
-            const response = await result.response;
-            res.json({ reply: response.text() });
-            return;
-        }
-    } catch (fallbackError) {
-        console.error("❌ Fallback Failed:", fallbackError);
-    }
-
-    res.status(500).json({ reply: "I'm having trouble connecting right now. Please try again later!" });
+    // ⚠️ DEBUG MODE: Sending the REAL error to the frontend so you can read it.
+    // Copy-paste the message you see in the chat window to me!
+    res.status(500).json({ 
+        reply: `⚠️ DEBUG ERROR: ${error.message}` 
+    });
   }
 });
 
