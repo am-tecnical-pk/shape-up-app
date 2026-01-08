@@ -17,9 +17,9 @@ const chatWithAI = asyncHandler(async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(API_KEY);
 
-    // ✅ FIX: Use "gemini-2.0-flash" 
-    // Your account only has access to the newest V2 models.
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // ✅ FIX: Use "gemini-2.0-flash-exp" (Experimental)
+    // Stable version ka free quota 0 tha, lekin Experimental version free hota hai.
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
     
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
@@ -28,15 +28,16 @@ const chatWithAI = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("❌ Google AI Error:", error);
 
-    // If 2.0 fails, try the generic "gemini-pro" as a last resort
+    // Agar Exp bhi fail ho, toh Lite version try karein (Backup)
     try {
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+        console.log("⚠️ Switching to Lite model...");
+        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite-preview-02-05" });
         const result = await fallbackModel.generateContent(fullPrompt);
         const response = await result.response;
         res.json({ reply: response.text() });
     } catch (fallbackError) {
          res.status(500).json({ 
-            reply: `⚠️ All models failed. Your specific API Key doesn't support 1.5 or 2.0 Flash. Error: ${error.message}` 
+            reply: `⚠️ Quota Error: It seems Google's Free Tier is full or restricted for your key right now. \nDetails: ${error.message}` 
         });
     }
   }
