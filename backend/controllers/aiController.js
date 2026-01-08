@@ -3,51 +3,42 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const chatWithAI = asyncHandler(async (req, res) => {
   const { message, userData } = req.body;
+  
   const API_KEY = process.env.GEMINI_API_KEY;
 
-  if (!API_KEY) return res.status(500).json({ reply: "❌ Key missing." });
+  if (!API_KEY) {
+      console.error("❌ ERROR: GEMINI_API_KEY is missing.");
+      return res.status(500).json({ reply: "System Error: API Key missing." });
+  }
 
-  // 1. Setup Context
+  // User Context Setup
   const name = userData?.name || "Athlete";
-  const fullPrompt = `Role: Fitness Trainer. User: ${name}. Question: "${message}". Keep it short.`;
+  const goal = userData?.goal || "General Fitness"; 
+  const weight = userData?.weight ? `${userData.weight}kg` : "unknown";
+
+  const fullPrompt = `
+    ROLE: You are "Shape Up AI", a fitness trainer.
+    USER: ${name}, Goal: ${goal}, Weight: ${weight}.
+    RULES: Keep answers short (max 3 sentences). Be motivating!
+    QUESTION: "${message}"
+  `;
 
   try {
     const genAI = new GoogleGenerativeAI(API_KEY);
-    // Try the standard model first
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
+
+    // ✅ FIX: Using a model explicitly allowed by your key
+    // We selected "gemini-2.0-flash" from your list.
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
-    return res.json({ reply: response.text() });
+    const text = response.text();
+    
+    res.json({ reply: text });
 
   } catch (error) {
-    console.error("❌ Generation Failed. Fetching available models...");
-
-    try {
-        // 🚨 AUTO-DEBUGGER: Ask Google what models ARE available for this key
-        const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
-        const listData = await listResponse.json();
-
-        if (listData.models) {
-            // Filter for models that support "generateContent"
-            const validModels = listData.models
-                .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
-                .map(m => m.name.replace("models/", "")) // Clean up names
-                .join(", ");
-
-            // 👇 RETURN THE LIST TO YOUR CHAT WINDOW
-            return res.status(500).json({ 
-                reply: `⚠️ YOUR KEY HAS ACCESS TO THESE MODELS ONLY:\n\n${validModels}\n\n(Tell me one of these names!)` 
-            });
-        } else {
-            return res.status(500).json({ 
-                reply: `❌ NO MODELS FOUND. Error: ${JSON.stringify(listData)}` 
-            });
-        }
-
-    } catch (fetchError) {
-        return res.status(500).json({ reply: `❌ CRITICAL FAILURE: ${fetchError.message}` });
-    }
+    console.error("❌ AI Error:", error);
+    res.status(500).json({ reply: "I'm having trouble connecting right now. Please try again later!" });
   }
 });
 
