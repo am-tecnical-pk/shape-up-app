@@ -1,72 +1,53 @@
 import asyncHandler from "express-async-handler";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const chatWithAI = asyncHandler(async (req, res) => {
   const { message, userData } = req.body;
   
-  // ✅ FIX 1: Use the Environment Variable (Secure)
-  // If the env var is missing, it falls back to the hardcoded one (only for local testing)
-  const API_KEY = process.env.GEMINI_API_KEY || "AIzaSyCQJykgDP-u-_NS0twzrAgyKPIDlb8HUQ4"; 
+  console.log("🔹 AI Request Received"); // Debug Log
 
-  // 1. EXTRACT CONTEXT
+  // 1. SECURE KEY CHECK
+  // We prioritize the Environment Variable. 
+  // If it's missing, we log a critical error.
+  const API_KEY = process.env.GEMINI_API_KEY;
+
+  if (!API_KEY) {
+      console.error("❌ CRITICAL ERROR: GEMINI_API_KEY is missing in Vercel Environment Variables.");
+      return res.status(500).json({ reply: "System Error: API Key is missing. Please check server settings." });
+  }
+
+  // 2. CONTEXT SETUP
   const name = userData?.name || "Athlete";
   const goal = userData?.goal || "General Fitness"; 
   const weight = userData?.weight ? `${userData.weight}kg` : "unknown weight";
 
-  // 2. THE MASTER INSTRUCTION (PERSONA)
-  const systemInstruction = `
-    ROLE:
-    You are "Shape Up AI", a world-class personal trainer embedded in the Shape Up app.
-    You are talking to **${name}**.
-    Their goal is **${goal}**.
-    Their weight is **${weight}**.
-
-    APP FEATURES (Guide the user here):
-    - **Nutrition Checker**: For logging food calories. (Suggest for diet questions).
-    - **BMR Calculator**: For finding daily calorie needs.
-    - **Workout Database**: For finding exercises.
-    - **Dashboard**: For tracking progress.
-
-    RULES:
-    1. **Be Personalized:** If goal is "Cut", suggest calorie deficits/cardio. If "Bulk", suggest protein/weights.
-    2. **Tone:** High energy, professional, use emojis 🏋️‍♂️🥗.
-    3. **Brevity:** Keep answers SHORT (max 3 sentences) unless asked for a list.
-    4. **Safety:** If asked about medical issues, advise seeing a doctor.
-
-    USER SAYS: "${message}"
+  const fullPrompt = `
+    ROLE: You are "Shape Up AI", a personal trainer.
+    USER: ${name}, Goal: ${goal}, Weight: ${weight}.
+    
+    YOUR RULES:
+    1. Answer strictly about fitness/nutrition.
+    2. Keep it short (max 3 sentences).
+    3. Be encouraging! 🏋️‍♂️
+    
+    USER ASKED: "${message}"
   `;
 
   try {
-    // ✅ FIX 2: Skip the "List Models" fetch. Just use the fastest model directly.
-    // This prevents Vercel timeouts.
-    const modelName = "models/gemini-1.5-flash";
+    // 3. USE GOOGLE SDK (More Stable)
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // 3. GENERATE CONTENT DIRECTLY
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemInstruction }] }],
-        }),
-      }
-    );
-
-    const data = await response.json();
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    const text = response.text();
     
-    if (!response.ok) {
-        console.error("Google API Error:", JSON.stringify(data));
-        throw new Error(data.error?.message || "Google Refused Connection");
-    }
-
-    const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Let's work out! 💪 (No text returned)";
-    
-    res.json({ reply: botReply });
+    console.log("✅ AI Response Generated Successfully");
+    res.json({ reply: text });
 
   } catch (error) {
-    console.error("❌ AI Controller Error:", error.message);
-    // Return a friendly error so the frontend doesn't crash
-    res.status(500).json({ reply: "My brain is buffering 🧠. Please try again in a moment!" });
+    console.error("❌ AI Generation Failed:", error); // This will show in Vercel Logs
+    res.status(500).json({ reply: "My brain is buffering 🧠. Please try again!" });
   }
 });
 
