@@ -4,54 +4,39 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const chatWithAI = asyncHandler(async (req, res) => {
   const { message, userData } = req.body;
   
-  // Vercel se nayi key uthayega
   const API_KEY = process.env.GEMINI_API_KEY;
 
+  // 1. Check if Key exists in Vercel
   if (!API_KEY) {
-      console.error("❌ ERROR: GEMINI_API_KEY missing in Vercel.");
-      return res.status(500).json({ reply: "Configuration Error: API Key missing." });
+      return res.status(500).json({ reply: "❌ CRITICAL: GEMINI_API_KEY is missing in Vercel Settings." });
   }
 
-  // User Context Setup
-  const name = userData?.name || "Athlete";
-  const goal = userData?.goal || "General Fitness"; 
-  const weight = userData?.weight ? `${userData.weight}kg` : "unknown";
+  // 2. Check for Spaces in Key (Common Mistake)
+  if (API_KEY.includes(" ")) {
+      return res.status(500).json({ reply: "❌ CRITICAL: API Key contains spaces. Go to Vercel and remove spaces from the key." });
+  }
 
-  const fullPrompt = `
-    ROLE: You are "Shape Up AI", a fitness trainer.
-    USER: ${name}, Goal: ${goal}, Weight: ${weight}.
-    RULES: Keep answers short (max 3 sentences). Be motivating!
-    QUESTION: "${message}"
-  `;
+  const name = userData?.name || "Athlete";
+  const fullPrompt = `Role: Fitness Trainer. User: ${name}. Question: "${message}". Keep it short.`;
 
   try {
     const genAI = new GoogleGenerativeAI(API_KEY);
 
-    // ✅ Naye Project ke liye "gemini-1.5-flash" best aur fast hai
+    // Try Standard Model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+    
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
-    const text = response.text();
-    
-    res.json({ reply: text });
+    res.json({ reply: response.text() });
 
   } catch (error) {
-    console.error("❌ Model Failed:", error.message);
+    console.error("❌ Google AI Error:", error);
 
-    // Agar Flash fail ho, toh backup "gemini-pro" try karein
-    try {
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-        const result = await fallbackModel.generateContent(fullPrompt);
-        const response = await result.response;
-        res.json({ reply: response.text() });
-    } catch (finalError) {
-        console.error("❌ All Models Failed:", finalError.message);
-        res.status(500).json({ 
-            reply: "I'm having trouble connecting to the new AI brain. Please check your API Key settings." 
-        });
-    }
+    // 🚨 DEBUG MODE: Show the REAL error to the user
+    // Is error ko copy karke mujhe bhejein!
+    res.status(500).json({ 
+        reply: `⚠️ ERROR DETAILS:\n\n${error.message}\n\n(Paste this here!)` 
+    });
   }
 });
 
