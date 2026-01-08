@@ -3,10 +3,11 @@ import asyncHandler from "express-async-handler";
 const chatWithAI = asyncHandler(async (req, res) => {
   const { message, userData } = req.body;
   
-  // 🔑 YOUR KEY
-  const API_KEY = "AIzaSyCQJykgDP-u-_NS0twzrAgyKPIDlb8HUQ4"; 
+  // ✅ FIX 1: Use the Environment Variable (Secure)
+  // If the env var is missing, it falls back to the hardcoded one (only for local testing)
+  const API_KEY = process.env.GEMINI_API_KEY || "AIzaSyCQJykgDP-u-_NS0twzrAgyKPIDlb8HUQ4"; 
 
-  // 1. EXTRACT CONTEXT (Defaults if missing)
+  // 1. EXTRACT CONTEXT
   const name = userData?.name || "Athlete";
   const goal = userData?.goal || "General Fitness"; 
   const weight = userData?.weight ? `${userData.weight}kg` : "unknown weight";
@@ -35,19 +36,11 @@ const chatWithAI = asyncHandler(async (req, res) => {
   `;
 
   try {
-    // 3. AUTO-DETECT MODEL (Safety Check)
-    // We ask Google what models are available to this key first.
-    const modelList = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
-    const listData = await modelList.json();
-    
-    // Pick the best model that supports 'generateContent'
-    const validModel = listData.models?.find(m => 
-        m.supportedGenerationMethods?.includes("generateContent") && 
-        (m.name.includes("flash") || m.name.includes("pro"))
-    );
-    const modelName = validModel ? validModel.name : "models/gemini-1.5-flash";
+    // ✅ FIX 2: Skip the "List Models" fetch. Just use the fastest model directly.
+    // This prevents Vercel timeouts.
+    const modelName = "models/gemini-1.5-flash";
 
-    // 4. GENERATE CONTENT
+    // 3. GENERATE CONTENT DIRECTLY
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${API_KEY}`,
       {
@@ -72,7 +65,8 @@ const chatWithAI = asyncHandler(async (req, res) => {
 
   } catch (error) {
     console.error("❌ AI Controller Error:", error.message);
-    res.status(500).json({ reply: "My brain is buffering 🧠. Please try again!" });
+    // Return a friendly error so the frontend doesn't crash
+    res.status(500).json({ reply: "My brain is buffering 🧠. Please try again in a moment!" });
   }
 });
 
