@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;700&display=swap');
+
+:root {
+  /* --- Brand Colors --- */
+  --primary-color: #0d6efd;
+  --secondary-color: #6610f2;
+  --accent-orange: #ffc107;
+  --accent-green: #198754;
+  
+  /* --- Light Mode Defaults --- */
+  --bg-color: #ffffff;
+  --text-color: #212529;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(0, 0, 0, 0.1);
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --blob-opacity: 0.6;
+  
+  /* --- Dark Mode Variables --- */
+  --bg-dark: #0f172a;       /* Deep Slate/Black */
+  --card-dark: #1e293b;     /* Dark Slate */
+  --text-bright: #f8fafc;
+  --text-dim: #94a3b8;
+  --input-bg-dark: #334155;
+  --input-border-dark: #475569;
+}
+
+/* =========================================
+   🌍 GLOBAL RESET
+   ========================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; min-height: 100vh;
+  font-family: 'Josefin Sans', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* =========================================
+   🌙 DARK MODE ENGINE
+   ========================================= */
+body.dark-mode {
+  background-color: var(--bg-dark) !important;
+  color: var(--text-bright) !important;
+}
+
+/* Force specific containers to adapt */
+body.dark-mode .card,
+body.dark-mode .modal-content,
+body.dark-mode .glass-panel, 
+body.dark-mode .glass-card,
+body.dark-mode .list-group-item,
+body.dark-mode .dropdown-menu {
+  background-color: var(--card-dark) !important;
+  color: var(--text-bright) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
+body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+  color: var(--text-bright) !important;
+}
+
+/* =========================================
+   🚨 AGGRESSIVE BUTTON FIXES (CRITICAL)
+   ========================================= */
+
+/* 1. Generic Button Reset for Dark Mode */
+body.dark-mode button { color: var(--text-bright); }
+
+/* 2. Fix "Light" Buttons (fixes white buttons on dark bg) */
+body.dark-mode .btn-light,
+body.dark-mode .btn-white,
+body.dark-mode .bg-light {
+    background-color: #334155 !important; /* Dark Grey */
+    color: #ffffff !important;
+    border: 1px solid #475569 !important;
+}
+body.dark-mode .btn-light:hover { background-color: #475569 !important; }
+
+/* 3. Fix "Outline-Dark" Buttons (fixes invisible black text) */
+body.dark-mode .btn-outline-dark,
+body.dark-mode .btn-outline-secondary {
+    color: #cbd5e1 !important;
+    border-color: #cbd5e1 !important;
+}
+body.dark-mode .btn-outline-dark:hover,
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* 4. Fix Close Buttons (Modals/Alerts) */
+body.dark-mode .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+/* 5. Fix Links */
+body.dark-mode a { color: #60a5fa; } /* Lighter Blue */
+
+/* =========================================
+   📝 INPUTS & FORMS FIX
+   ========================================= */
+input, select, textarea, .form-control, .form-select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--input-border) !important;
+}
+
+body.dark-mode input, 
+body.dark-mode select, 
+body.dark-mode textarea, 
+body.dark-mode .form-control, 
+body.dark-mode .form-select {
+  background-color: var(--input-bg-dark) !important;
+  color: var(--text-bright) !important;
+  border-color: var(--input-border-dark) !important;
+}
+body.dark-mode input::placeholder { color: var(--text-dim) !important; }
+
+/* =========================================
+   🎨 ANIMATED BACKGROUND BLOBS
+   ========================================= */
+.background-blobs {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -1; overflow: hidden; pointer-events: none;
+}
+.blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: var(--blob-opacity);
+  animation: float 10s infinite alternate;
+}
+.blob-1 { width: 60vw; height: 60vw; background: #a78bfa; top: -20vh; right: -20vw; opacity: 0.4; }
+.blob-2 { width: 50vw; height: 50vw; background: #60a5fa; bottom: -10vh; left: -10vw; opacity: 0.3; animation-delay: 2s; }
+body.dark-mode .blob { opacity: 0.15; filter: blur(100px); }
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+/* =========================================
+   🧭 NAVBAR FIX
+   ========================================= */
+.navbar {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.navbar-brand, .nav-link { color: #212529 !important; }
+
+/* Dark Mode Navbar */
+body.dark-mode .navbar {
+  background-color: #0f172a !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+body.dark-mode .navbar-brand, 
+body.dark-mode .nav-link { color: #f8fafc !important; }
+body.dark-mode .navbar-toggler-icon { filter: invert(1); }
+
+/* ... (Keep your existing CSS variables and reset) ... */
+
+/* =========================================
+   🚨 AGGRESSIVE TABLE FIX (ADD THIS SECTION)
+   ========================================= */
+
+/* Force Table Headers to have Dark Background & White Text */
+body.dark-mode .table thead th,
+body.dark-mode .table-light th,
+body.dark-mode thead.bg-light th {
+    background-color: #0f172a !important; /* Dark Blue */
+    color: #ffffff !important;           /* White Text */
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Fix "table-light" container background */
+body.dark-mode .table-light {
+    background-color: transparent !important;
+}
+
+/* Fix Headings H1-H6 globally */
+body.dark-mode h1, 
+body.dark-mode h2, 
+body.dark-mode h3, 
+body.dark-mode h4, 
+body.dark-mode h5, 
+body.dark-mode h6 {
+    color: #f8fafc !important; /* Bright White */
+}

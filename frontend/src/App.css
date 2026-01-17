@@ -1,0 +1,123 @@
+/* =========================================
+   🏋️ EXERCISE & COMPONENT STYLES
+   ========================================= */
+
+/* --- Exercise Card (Responsive Fix) --- */
+.exercise-card {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border-top: 4px solid #FF2625;
+  border-bottom-left-radius: 20px;
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  padding-bottom: 10px;
+  transform: scale(1, 1);
+  transition: 0.3s all ease-in-out;
+  margin: 10px auto;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* Dark Mode Exercise Card - Matches your Dark Mode Theme */
+body.dark-mode .exercise-card {
+  background: #1e293b; /* Dark Slate */
+  border: 1px solid rgba(255,255,255,0.05);
+  border-top: 4px solid #FF2625;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.exercise-card img {
+  height: 280px;
+  width: 100%;
+  object-fit: cover;
+  border-top-left-radius: 20px;
+}
+
+body.dark-mode .exercise-card img {
+  opacity: 0.9; 
+}
+
+.exercise-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+/* --- Body Part Card --- */
+.bodyPart-card {
+  transform: scale(1, 1);
+  transition: 0.3s all ease-in-out;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  width: 270px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+body.dark-mode .bodyPart-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.bodyPart-card:hover {
+  transform: scale(1.1);
+  border-bottom: 3px solid #FF2625;
+}
+
+/* --- Search Bar & Buttons --- */
+.search-btn:hover {
+  color: #FF2625 !important;
+  border: 1px solid #FF2625 !important;
+  background-color: transparent !important;
+}
+
+/* --- Video Section --- */
+.exercise-video {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 380px;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+body.dark-mode .exercise-video:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+/* =========================================
+   📱 RESPONSIVE FIXES
+   ========================================= */
+@media screen and (max-width: 1200px) {
+  .hero-banner-img {
+    display: none; 
+  }
+  .detail-image {
+    width: 100%;
+    height: auto;
+  }
+  .react-horizontal-scrolling-menu--scroll-container {
+    width: 100%;
+  }
+  .left-arrow, .right-arrow {
+    position: static !important;
+    margin: 10px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .exercise-card {
+    width: 100%;
+  }
+}
