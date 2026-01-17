@@ -18,17 +18,18 @@ import dailyLogRoutes from "./routes/dailyLogRoutes.js";
 import reminderRoutes from "./routes/reminderRoutes.js"; 
 import aiRoutes from "./routes/aiRoutes.js"; 
 import emailRoutes from "./routes/emailRoutes.js"; 
-import reviewRoutes from "./routes/reviewRoutes.js"; // <--- 1. IMPORT THIS
+import reviewRoutes from "./routes/reviewRoutes.js"; 
 
 connectDB();
 
 const app = express();
 
-// ✅ CORS CONFIGURATION
+// ✅ CORS CONFIGURATION (UPDATED)
+// This now allows localhost AND any website ending in .vercel.app
 app.use(cors({
     origin: [
         "http://localhost:3000",                  
-        "https://shape-up-app-gray.vercel.app"    
+        /\.vercel\.app$/    
     ], 
     credentials: true
 }));
@@ -46,7 +47,7 @@ app.use("/api/daily-logs", dailyLogRoutes);
 app.use("/api/reminders", reminderRoutes); 
 app.use("/api/ai", aiRoutes); 
 app.use("/api/support", emailRoutes);
-app.use("/api/reviews", reviewRoutes); // <--- 2. ADD THIS ROUTE
+app.use("/api/reviews", reviewRoutes);
 
 // Root Route
 app.get("/", (req, res) => res.send("API is running..."));
