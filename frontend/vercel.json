@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { 
+      "source": "/api/(.*)", 
+      "destination": "https://shape-up-app-blkm.vercel.app/api/$1" 
+    }
+  ]
+}
