@@ -1,33 +1,61 @@
-import express from "express";
-import { 
-    chatWithAI, 
-    generateWorkoutPlan, 
-    saveWorkoutPlan, 
-    getMyRoutine, 
-    getDailyBriefing, 
-    analyzeWorkoutSession,
-    generateDietPlan,
-    saveDietPlan,
-    getMyDiet,
-    analyzeFoodImage
-} from "../controllers/aiController.js";
+import { apiSlice } from "./apiSlice";
 
-const router = express.Router();
+const AI_URL = "/api/ai";
 
-// --- 1. DAILY BRIEFING & CHAT ---
-router.get("/daily-briefing", protect, getDailyBriefing);
-router.post("/chat", protect, chatWithAI);
+export const aiApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    // 1. Briefing
+    getDailyBriefing: builder.query({
+      query: () => ({ url: `${AI_URL}/daily-briefing`, method: "GET" }),
+      keepUnusedDataFor: 300,
+    }),
+    
+    // 2. Workout Analysis
+    analyzeWorkoutSession: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/analyze-workout`, method: "POST", body: data }),
+    }),
 
-// --- 2. WORKOUT AI ---
-router.post("/generate", protect, generateWorkoutPlan);
-router.post("/save-routine", protect, saveWorkoutPlan);
-router.get("/my-routine", protect, getMyRoutine);
-router.post("/analyze-workout", protect, analyzeWorkoutSession);
+    // 3. Chat
+    chatWithAI: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/chat`, method: "POST", body: data }),
+    }),
 
-// --- 3. DIET & VISION AI ---
-router.post("/generate-diet", protect, generateDietPlan);
-router.post("/save-diet", protect, saveDietPlan);
-router.get("/my-diet", protect, getMyDiet);
-router.post("/analyze-food", protect, analyzeFoodImage);
+    // 4. Workout Generation
+    generateWorkoutPlan: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/generate`, method: "POST", body: data }),
+    }),
+    saveWorkoutPlan: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/save-routine`, method: "POST", body: data }),
+    }),
+    getMyRoutine: builder.query({
+      query: () => ({ url: `${AI_URL}/my-routine`, method: "GET" }),
+    }),
 
-export default router;
+    // 5. Diet Generation
+    generateDietPlan: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/generate-diet`, method: "POST", body: data }),
+    }),
+    saveDietPlan: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/save-diet`, method: "POST", body: data }),
+    }),
+    getMyDiet: builder.query({
+      query: () => ({ url: `${AI_URL}/my-diet`, method: "GET" }),
+    }),
+    analyzeFoodImage: builder.mutation({
+      query: (data) => ({ url: `${AI_URL}/analyze-food`, method: "POST", body: data }),
+    }),
+  }),
+});
+
+export const { 
+  useGetDailyBriefingQuery, 
+  useAnalyzeWorkoutSessionMutation,
+  useChatWithAIMutation,
+  useGenerateWorkoutPlanMutation,
+  useSaveWorkoutPlanMutation,
+  useGetMyRoutineQuery,
+  useGenerateDietPlanMutation,
+  useSaveDietPlanMutation,
+  useGetMyDietQuery,
+  useAnalyzeFoodImageMutation
+} = aiApiSlice;

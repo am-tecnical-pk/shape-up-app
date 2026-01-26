@@ -1,11 +1,10 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js"; // 👈 CRITICAL IMPORT
+import { protect } from "../middleware/authMiddleware.js"; // 👈 THIS IMPORT IS CRITICAL
 import { 
   chatWithAI, 
   generateWorkoutPlan, 
   saveWorkoutPlan, 
   getMyRoutine, 
-  adjustRoutine, // Required for Progressive Overload
   getDailyBriefing, 
   analyzeWorkoutSession, 
   generateDietPlan, 
@@ -16,15 +15,14 @@ import {
 
 const router = express.Router();
 
-// --- 1. CHAT & DASHBOARD ---
-router.post("/chat", protect, chatWithAI);
+// --- 1. DAILY BRIEFING & CHAT ---
 router.get("/daily-briefing", protect, getDailyBriefing);
+router.post("/chat", protect, chatWithAI);
 
 // --- 2. WORKOUT AI ---
 router.post("/generate", protect, generateWorkoutPlan);
 router.post("/save-routine", protect, saveWorkoutPlan);
 router.get("/my-routine", protect, getMyRoutine);
-router.post("/adjust-routine", protect, adjustRoutine);
 router.post("/analyze-workout", protect, analyzeWorkoutSession);
 
 // --- 3. DIET & VISION AI ---
