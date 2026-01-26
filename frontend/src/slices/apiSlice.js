@@ -4,7 +4,6 @@ const baseQuery = fetchBaseQuery({ baseUrl: "" });
 
 export const apiSlice = createApi({
   baseQuery,
-  // ⚠️ CRITICAL: All tags must be listed here for auto-refresh to work
-  tagTypes: ["User", "Workout", "DailyLog", "Routine"], 
+  tagTypes: ["User", "Workout", "DailyLog", "Routine", "Diet", "Reminder"], 
   endpoints: (builder) => ({}),
 });
