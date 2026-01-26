@@ -1,35 +1,33 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authMiddleware.js"; // 👈 CRITICAL IMPORT
 import { 
   chatWithAI, 
   generateWorkoutPlan, 
   saveWorkoutPlan, 
   getMyRoutine, 
-  adjustRoutine,
-  getDailyBriefing, // NEW
-  analyzeWorkoutSession, // NEW
-  generateDietPlan, // NEW
-  saveDietPlan, // NEW
-  getMyDiet, // NEW
-  analyzeFoodImage // NEW
+  adjustRoutine, // Required for Progressive Overload
+  getDailyBriefing, 
+  analyzeWorkoutSession, 
+  generateDietPlan, 
+  saveDietPlan, 
+  getMyDiet, 
+  analyzeFoodImage 
 } from "../controllers/aiController.js";
 
 const router = express.Router();
 
-// Chat
+// --- 1. CHAT & DASHBOARD ---
 router.post("/chat", protect, chatWithAI);
+router.get("/daily-briefing", protect, getDailyBriefing);
 
-// Workout
+// --- 2. WORKOUT AI ---
 router.post("/generate", protect, generateWorkoutPlan);
 router.post("/save-routine", protect, saveWorkoutPlan);
 router.get("/my-routine", protect, getMyRoutine);
 router.post("/adjust-routine", protect, adjustRoutine);
-router.post("/analyze-workout", protect, analyzeWorkoutSession); // NEW ROUTE
+router.post("/analyze-workout", protect, analyzeWorkoutSession);
 
-// Dashboard
-router.get("/daily-briefing", protect, getDailyBriefing); // NEW ROUTE
-
-// Diet
+// --- 3. DIET & VISION AI ---
 router.post("/generate-diet", protect, generateDietPlan);
 router.post("/save-diet", protect, saveDietPlan);
 router.get("/my-diet", protect, getMyDiet);
